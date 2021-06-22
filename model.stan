@@ -60,7 +60,7 @@ model {
   phi_inv ~ inv_gamma(1,1);
   lambda ~ inv_gamma(.1,.1);
   gamma ~ lognormal(0,1);
-  a ~ beta(1,20);
+  a ~ beta(1,5);
   b ~ uniform(0,1);
   R0 ~ lognormal(0,1);
   cases ~ neg_binomial_2(to_vector(ode[,3])+1e-5, phi);

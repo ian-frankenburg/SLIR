@@ -26,7 +26,7 @@ transformed data {
   real x_r[1] = {1.0};
   int x_i[1] = {N};
   real ts[n_obs];
-  real i0 = cases[t0];
+  real y0[3];
   for(i in 1:n_obs){ts[i] = t0+i;}
   y0[1] = N-cases[1];
   y0[2] = cases[1];

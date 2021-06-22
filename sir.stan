@@ -10,8 +10,6 @@ functions {
       int N = x_i[1];
       real beta = theta[1];
       real gamma = theta[2];
-      // changepoint
-      //if(t<=5){l=0;r=0;}
       dS_dt = -beta  * (S/N) * I;
       dI_dt = beta * (S/N) * I - gamma * I;
       dR_dt = gamma * I;

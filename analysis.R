@@ -1,12 +1,9 @@
 library(cmdstanr)
 library(rstan)
-library(gridExtra)
 library(ggplot2)
-library(deSolve)
-library(latex2exp)
 
 ## Load New York City Cases and raw data visualization
-#https://github.com/nychealth/coronavirus-data
+# source: https://github.com/nychealth/coronavirus-data
 nyc_data <- read.csv("boroughs-case-hosp-death.csv")
 # outcome y1 will be cases starting March 8th, 2020 to align with Apple mobility data and state of emergency declared in NYC
 n_obs=90
@@ -61,8 +58,8 @@ sir.mod <- cmdstan_model(file)
 sir_mcmc <- sir.mod$sample(data = model_data,
                            max_treedepth = 10,adapt_delta = .8,
                            chains = 1,
-                           iter_warmup = 500,
-                           iter_sampling = 500,
+                           iter_warmup = 250,
+                           iter_sampling = 250,
                            refresh = 100, parallel_chains = getOption("mc.cores", 4))
 stanfit <- rstan::read_stan_csv(sir_mcmc$output_files())
 a=as.data.frame(stanfit)
@@ -74,7 +71,7 @@ colnames(sir_pred) <- make.names(colnames(sir_pred))
 
 
 ###### Inference with SLIR model ######  
-file <- file.path("model.stan")
+file <- file.path("slir.stan")
 slir.mod <- cmdstan_model(file)
 slir_mcmc <- slir.mod$sample(data = model_data,seed=123,
                              max_treedepth = 10,adapt_delta = .8,
@@ -135,25 +132,4 @@ p + geom_line(data = slir_pred, mapping = aes(x=1:model_data$n_obs,y=X50., color
   guides(colour = guide_legend(override.aes = list(size = 3)))+
   theme(plot.title = element_text(size=30, hjust=.5))
 
-
-findstr = paste0("R_effective\\[\\d+\\]")
-locs = grepl(findstr, names(a))
-slir_pred <- cbind(as.data.frame(summary(
-  stanfit.slir, pars = names(a)[locs], probs = c(0.05, 0.5, 0.95))$summary), 1:model_data$n_obs)
-colnames(slir_pred) <- make.names(colnames(slir_pred)) 
-p = ggplot() + ggtitle(TeX('$\\mathit{R}_0$ and $\\mathit{R}_t$'))#
-datFull2 = model_data$movement_data
-labs = list(TeX('$\\mathit{R}_0'),TeX('$\\mathit{R}_t$'))
-nm = names(df)[-1]
-p + geom_line(data = slir_pred, mapping = aes(x=1:model_data$n_obs,y=X50., color="re"), size=1.5)+
-  geom_ribbon(data = slir_pred,aes(x=1:model_data$n_obs,ymin= X5., ymax=X95.),alpha=.3, fill="darkorange")+
-  xlab("Days") + ylab(TeX('$\\mathit{R}$'))+ylim(c(0,7))+
-  geom_point(aes(x=0,y=mean(slir_mcmc$draws("R0")),color='r0'),size=3)+
-  geom_segment(aes(x=0,xend=0,y=quantile(slir_mcmc$draws("R0"),probs = .025), yend=quantile(slir_mcmc$draws("R0"),probs = .975),color='r0'),size=5,alpha=.3)+
-  theme_minimal(base_size = 20)+
-  scale_colour_manual(name = '', 
-                      values =c('r0'='firebrick2','re'='darkorange'),labels=labs)+
-  theme(legend.position="bottom")+geom_hline(aes(yintercept = 1),alpha=.6,linetype=2,size=1)+
-  guides(colour = guide_legend(override.aes = list(size = 5,linetype=c(0,0))))+
-  theme(plot.title = element_text(size=30, hjust=.5))
 

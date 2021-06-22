@@ -17,6 +17,7 @@ y1full = rowSums(cbind(nyc_data$BK_CASE_COUNT,
                        nyc_data$MN_CASE_COUNT,
                        nyc_data$BX_CASE_COUNT,
                        nyc_data$SI_CASE_COUNT))[7:(7+n_obs-1)]
+# borough population counts
 N = sum(2559903, 2253858, 1628706, 1418207, 476143)
 
 ## Mobility Time Series Data: 
@@ -24,9 +25,9 @@ N = sum(2559903, 2253858, 1628706, 1418207, 476143)
 applemobilitytrends <- read.csv("applemobilitytrends.csv")
 # filter by NYC data
 nyc_region = which(applemobilitytrends$region=="New York")
-# remove row labels. dat now contains driving, walking, transit % change
+# remove row labels. data now contains driving, walking, transit % change
 dat = applemobilitytrends[nyc_region,-c(1:7)]
-# outcome for analysis will be first 100 days of transit change after March 7th
+# outcome for analysis will be first 90 days of transit change after March 7th
 start_date = which(colnames(dat)=="X2020.03.08") # start on 8th
 y2 = as.numeric((dat[3,start_date:(start_date+n_obs-1)]))/100
 df = data.frame("Day"=1:n_obs,
